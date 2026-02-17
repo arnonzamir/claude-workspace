@@ -1,0 +1,13 @@
+services:
+  workspace:
+    build: .
+    ports:
+      - "2222:22"
+    environment:
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
+    volumes:
+      - home-data:/home/arnon
+    restart: unless-stopped
+
+volumes:
+  home-data:
