@@ -20,6 +20,10 @@ RUN apt-get update && \
     locales \
     && rm -rf /var/lib/apt/lists/*
 
+# Install ttyd (web terminal)
+RUN curl -fsSL https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 -o /usr/local/bin/ttyd && \
+    chmod +x /usr/local/bin/ttyd
+
 # Set up locale
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
@@ -41,6 +45,6 @@ RUN mkdir -p /var/run/sshd && \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 22
+EXPOSE 22 7681
 
 CMD ["/entrypoint.sh"]
