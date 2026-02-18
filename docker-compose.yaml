@@ -4,12 +4,14 @@ services:
     ports:
       - "2222:22"
       - "7681:7681"
+      - "6080:6080"
     environment:
       - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
       - ANTHROPIC_AUTH_TOKEN=${ANTHROPIC_AUTH_TOKEN}
       - TTYD_PASSWORD=${TTYD_PASSWORD}
     volumes:
       - home-data:/home/arnon
+    shm_size: '256m'
     restart: unless-stopped
 
 volumes:

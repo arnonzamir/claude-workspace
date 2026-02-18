@@ -13,6 +13,7 @@ fi
 # Forward select env vars to SSH sessions and ttyd
 cat > /etc/profile.d/claude-env.sh << 'ENVEOF'
 # Forwarded from container environment
+export DISPLAY=:99
 ENVEOF
 for var in ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY; do
     val=$(eval echo "\$$var")
@@ -25,12 +26,28 @@ chmod 644 /etc/profile.d/claude-env.sh
 # Generate SSH host keys if missing
 ssh-keygen -A 2>/dev/null
 
-# Start SSH in background
+# Start SSH
 /usr/sbin/sshd
+
+# Start virtual display
+export DISPLAY=:99
+Xvfb :99 -screen 0 1280x800x24 &
+sleep 1
+
+# Start lightweight window manager
+openbox &
+
+# Start VNC server on the virtual display
+x11vnc -display :99 -forever -nopw -shared -rfbport 5900 &
+
+# Start noVNC (web-based VNC client) on port 6080
+websockify --web /usr/share/novnc 6080 localhost:5900 &
+
+echo "=== Remote desktop ready on port 6080 ==="
 
 # Start ttyd (web terminal) as main process
 echo "=== Starting web terminal on port 7681 ==="
-TTYD_OPTS="-p 7681 -t fontSize=14 -t theme={'background':'#1a1a2e'}"
+TTYD_OPTS="-p 7681 -t fontSize=14"
 if [ -n "$TTYD_PASSWORD" ]; then
     exec ttyd $TTYD_OPTS -c "arnon:${TTYD_PASSWORD}" login -f arnon
 else
